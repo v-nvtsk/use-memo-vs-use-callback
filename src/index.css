@@ -45,7 +45,7 @@ input:focus {
 }
 
 .container {
-  max-width: 800px;
+  max-width: 1200px;
   width: 100%;
   padding: 48px 24px;
   box-sizing: border-box;
@@ -211,4 +211,26 @@ input:focus {
 
 .callback-val {
   color: #ef4444;
+}
+
+.custom-card {
+  display: flex;
+  flex-direction: column;
+  border-top: 4px solid #8b5cf6;
+}
+
+.custom-val {
+  color: #8b5cf6;
+}
+
+.custom-btn {
+  background-color: #8b5cf6;
+}
+
+.custom-btn:hover {
+  background-color: #7c3aed;
+}
+
+.custom-btn:active {
+  background-color: #6d28d9;
 }

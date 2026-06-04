@@ -8,12 +8,33 @@ import debounce from 'lodash/debounce';
 
 let lodashCallsInUseCallback = 0;
 let lodashCallsInUseMemo = 0;
+let customDebounceCalls = 0;
 let appRenders = 0;
+
+
+// Собственная простая реализация функции debounce
+function customDebounce<Args extends unknown[]>(func: (...args: Args) => void, wait: number) {
+  customDebounceCalls++;
+  console.warn(`[customDebounce] Функция инициализирована! Создан новый таймер.`, customDebounceCalls);
+  let timeout: ReturnType<typeof setTimeout> | null = null;
+  
+  function debounced(...args: Args) {
+    if (timeout !== null) {
+      clearTimeout(timeout);
+    }
+    timeout = setTimeout(() => {
+      func(...args);
+    }, wait);
+  }
+
+  return debounced;
+}
 
 export default function Demo() {
   appRenders++;
   const [memoValue, setMemoValue] = useState("");
   const [callbackValue, setCallbackValue] = useState("");
+  const [customValue, setCustomValue] = useState("");
   const [, setDummy] = useState(0);
 
   // === ТЕСТ 1: useMemo ===
@@ -47,6 +68,17 @@ export default function Demo() {
     [],
   );
 
+  // === ТЕСТ 3: Собственная реализация debounce ===
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedCustomFn = useCallback(
+    // eslint-disable-next-line react-hooks/use-memo
+    customDebounce((value: string) => {
+        console.log(
+          `%c[Custom] СРАБОТАЛ ДЕБАУНС для значения: "${value}"`,
+          "color: #8b5cf6; font-weight: bold;",
+        );
+      }, 500),[]);
+
   const handleMemoInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setMemoValue(value);
@@ -57,6 +89,12 @@ export default function Demo() {
     const value = e.target.value;
     setCallbackValue(value);
     debouncedCallbackFn(value);
+  };
+
+  const handleCustomInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setCustomValue(value);
+    debouncedCustomFn(value);
   };
 
   return (
@@ -123,7 +161,29 @@ export default function Demo() {
             </span>
           </div>
         </div>
+
+        {/* Блок Собственный Debounce */}
+        <div className="card custom-card">
+          <h3>Вариант 3: Свой Debounce (useCallback)</h3>
+          <p className="card-desc">
+            Использует <strong>собственную реализацию</strong> дебаунса. Функция
+            оборачивается в <code>useCallback</code> с IIFE, имитируя оригинальный lodash debounce.
+          </p>
+          <input
+            type="text"
+            value={customValue}
+            onChange={handleCustomInput}
+            placeholder="Печатай сюда (свой debounce)..."
+          />
+          <div className="card-stats">
+            Инициализаций customDebounce:{" "}
+            <span className="stat-value custom-val">
+              {customDebounceCalls}
+            </span>
+          </div>
+        </div>
       </div>
     </>
   );
 }
+
